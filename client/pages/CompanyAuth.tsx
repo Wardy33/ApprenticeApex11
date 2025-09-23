@@ -597,14 +597,11 @@ export function CompanySignInForm() {
     setIsSubmitting(true);
 
     try {
-      console.log('Attempting company signin to /api/auth/company/signin with data:', {
+      console.log('Attempting company signin via /api/auth/login with role=company:', {
         email: formData.email
       });
 
-      const response = await apiClient.request<{ token: string; user: any }>('/api/auth/company/signin', {
-        method: 'POST',
-        body: formData
-      });
+      const response = await apiClient.login(formData.email, formData.password, 'company');
 
       console.log('Company login response:', response);
 
@@ -614,7 +611,7 @@ export function CompanySignInForm() {
         alert(`Sign in failed: ${errorMessage}`);
       } else {
         // Use consistent token storage
-        localStorage.setItem('authToken', response.data.token as string);
+        localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('userProfile', JSON.stringify(response.data.user));
         console.log('Company login successful, redirecting to /company');
         navigate('/company');
