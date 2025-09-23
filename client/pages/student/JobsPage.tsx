@@ -206,7 +206,7 @@ function JobsPage() {
           <button
             onClick={() =>
               navigate(
-                `/student/apprenticeship-info/${currentApprenticeship.id}`,
+                `/candidate/apprenticeship-info/${currentApprenticeship.id}`,
               )
             }
             className="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-full text-gray-700 font-medium transition-colors"

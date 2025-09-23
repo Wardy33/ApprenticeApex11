@@ -27,7 +27,7 @@ export function useAccessControl() {
     setError(null);
 
     try {
-      const response = await apiClient.request<StagedProfile>(`/api/access-control/student/${studentId}/profile`);
+      const response = await apiClient.request<StagedProfile>(`/api/access-control/candidate/${studentId}/profile`);
       
       if (response.error) {
         setError(response.error.error);
@@ -45,7 +45,7 @@ export function useAccessControl() {
 
   const getAccessLevel = useCallback(async (studentId: string): Promise<AccessLevel | null> => {
     try {
-      const response = await apiClient.request<AccessLevel>(`/api/access-control/student/${studentId}/access-level`);
+      const response = await apiClient.request<AccessLevel>(`/api/access-control/candidate/${studentId}/access-level`);
       
       if (response.error) {
         setError(response.error.error);
@@ -68,7 +68,7 @@ export function useAccessControl() {
     setError(null);
 
     try {
-      const response = await apiClient.request(`/api/access-control/student/${studentId}/request-upgrade`, {
+      const response = await apiClient.request(`/api/access-control/candidate/${studentId}/request-upgrade`, {
         method: 'POST',
         body: {
           targetLevel,
@@ -100,7 +100,7 @@ export function useAccessControl() {
     setError(null);
 
     try {
-      const response = await apiClient.request<{ success: boolean }>(`/api/access-control/student/${studentId}/process-payment`, {
+      const response = await apiClient.request<{ success: boolean }>(`/api/access-control/candidate/${studentId}/process-payment`, {
         method: 'POST',
         body: {
           targetLevel,
@@ -130,7 +130,7 @@ export function useAccessControl() {
     setError(null);
 
     try {
-      const response = await apiClient.request<{ success: boolean }>(`/api/access-control/student/${studentId}/accept-commitment`, {
+      const response = await apiClient.request<{ success: boolean }>(`/api/access-control/candidate/${studentId}/accept-commitment`, {
         method: 'POST',
         body: commitmentData
       });
@@ -155,7 +155,7 @@ export function useAccessControl() {
     metadata?: any
   ): Promise<void> => {
     try {
-      await apiClient.request(`/api/access-control/student/${studentId}/track-interaction`, {
+      await apiClient.request(`/api/access-control/candidate/${studentId}/track-interaction`, {
         method: 'POST',
         body: {
           interactionType,
@@ -179,7 +179,7 @@ export function useAccessControl() {
     evidence?: any
   ): Promise<boolean> => {
     try {
-      const response = await apiClient.request(`/api/access-control/student/${studentId}/report-suspicious`, {
+      const response = await apiClient.request(`/api/access-control/candidate/${studentId}/report-suspicious`, {
         method: 'POST',
         body: {
           reason,

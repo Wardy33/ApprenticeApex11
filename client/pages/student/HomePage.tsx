@@ -115,7 +115,7 @@ function HomePage() {
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-4">
           <Link
-            to="/student/jobs"
+            to="/candidate/jobs"
             className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 text-white transition-all duration-200 hover:scale-105"
           >
             <Building2 className="w-6 h-6 mb-2" />
@@ -123,7 +123,7 @@ function HomePage() {
             <p className="text-sm opacity-90">Find your perfect match</p>
           </Link>
           <Link
-            to="/student/matches"
+            to="/candidate/matches"
             className="bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl p-4 text-white transition-all duration-200 hover:scale-105"
           >
             <Heart className="w-6 h-6 mb-2" />
@@ -140,7 +140,7 @@ function HomePage() {
             Recent Applications
           </h2>
           <Link
-            to="/student/applications"
+            to="/candidate/applications"
             className="text-blue-600 text-sm font-medium"
           >
             View All

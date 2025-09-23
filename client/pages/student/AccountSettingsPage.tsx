@@ -35,7 +35,7 @@ function AccountSettingsPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile</h3>
           <div className="space-y-1">
             <Link
-              to="/student/edit-profile-info"
+              to="/candidate/edit-profile-info"
               className="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 flex items-center justify-between"
             >
               <div className="flex items-center">
@@ -61,7 +61,7 @@ function AccountSettingsPage() {
               </svg>
             </Link>
             <Link
-              to="/student/edit-skills-preferences"
+              to="/candidate/edit-skills-preferences"
               className="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 flex items-center justify-between"
             >
               <div className="flex items-center">
@@ -94,7 +94,7 @@ function AccountSettingsPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Security</h3>
           <div className="space-y-1">
             <Link
-              to="/student/change-password"
+              to="/candidate/change-password"
               className="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 flex items-center justify-between"
             >
               <div className="flex items-center">
@@ -120,7 +120,7 @@ function AccountSettingsPage() {
               </svg>
             </Link>
             <Link
-              to="/student/privacy-settings"
+              to="/candidate/privacy-settings"
               className="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 flex items-center justify-between"
             >
               <div className="flex items-center">
@@ -155,7 +155,7 @@ function AccountSettingsPage() {
           </h3>
           <div className="space-y-1">
             <Link
-              to="/student/notification-settings"
+              to="/candidate/notification-settings"
               className="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 flex items-center justify-between"
             >
               <div className="flex items-center">
@@ -190,7 +190,7 @@ function AccountSettingsPage() {
           </h3>
           <div className="space-y-1">
             <Link
-              to="/student/language-region"
+              to="/candidate/language-region"
               className="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 flex items-center justify-between"
             >
               <div className="flex items-center">
@@ -223,7 +223,7 @@ function AccountSettingsPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Account</h3>
           <div className="space-y-1">
             <Link
-              to="/student/download-data"
+              to="/candidate/download-data"
               className="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 flex items-center justify-between"
             >
               <div className="flex items-center">

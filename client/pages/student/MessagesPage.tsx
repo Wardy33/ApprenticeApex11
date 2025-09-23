@@ -71,7 +71,7 @@ function MessagesPage() {
             {filteredConversations.map((conversation) => (
               <Link
                 key={conversation.id}
-                to={`/student/chat/${conversation.id}`}
+                to={`/candidate/chat/${conversation.id}`}
                 className="block p-4 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center space-x-3">
@@ -122,7 +122,7 @@ function MessagesPage() {
                 employers.
               </p>
               <Link
-                to="/student/jobs"
+                to="/candidate/jobs"
                 className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
                 Browse Jobs

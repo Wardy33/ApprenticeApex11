@@ -106,13 +106,13 @@ function MatchesPage() {
                   </div>
                   <div className="flex gap-2">
                     <Link
-                      to={`/student/apprenticeship-info/${match.id}`}
+                      to={`/candidate/apprenticeship-info/${match.id}`}
                       className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
                     >
                       View Details
                     </Link>
                     <Link
-                      to={`/student/chat/${match.id}`}
+                      to={`/candidate/chat/${match.id}`}
                       className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
                     >
                       <MessageCircle className="h-4 w-4" />

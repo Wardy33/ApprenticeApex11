@@ -28,7 +28,7 @@ function ProfilePage() {
               <User className="h-12 w-12 text-gray-500" />
             </div>
             <Link
-              to="/student/change-picture"
+              to="/candidate/change-picture"
               className="absolute bottom-0 right-0 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white hover:bg-orange-600 transition-colors"
             >
               <Camera className="h-4 w-4" />
@@ -55,7 +55,7 @@ function ProfilePage() {
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-4">
           <Link
-            to="/student/edit-about"
+            to="/candidate/edit-about"
             className="bg-white rounded-xl p-4 hover:bg-gray-50 transition-colors"
           >
             <Edit className="h-6 w-6 text-orange-500 mb-2" />
@@ -65,7 +65,7 @@ function ProfilePage() {
             </p>
           </Link>
           <Link
-            to="/student/edit-skills"
+            to="/candidate/edit-skills"
             className="bg-white rounded-xl p-4 hover:bg-gray-50 transition-colors"
           >
             <Settings className="h-6 w-6 text-blue-500 mb-2" />
@@ -83,7 +83,7 @@ function ProfilePage() {
               Contact Information
             </h3>
             <Link
-              to="/student/edit-contact"
+              to="/candidate/edit-contact"
               className="text-orange-500 hover:text-orange-600 transition-colors"
             >
               <Edit className="h-5 w-5" />
@@ -112,7 +112,7 @@ function ProfilePage() {
           </h3>
           <div className="space-y-3">
             <Link
-              to="/student/account-settings"
+              to="/candidate/account-settings"
               className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <div className="flex items-center gap-3">
