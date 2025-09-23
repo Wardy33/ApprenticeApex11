@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Master Admin</title>
+</head>
+<body>
+    <h1>Create Master Admin Account</h1>
+    <button onclick="createMasterAdmin()">Create Master Admin</button>
+    <div id="result"></div>
+
+    <script>
+        async function createMasterAdmin() {
+            try {
+                const response = await fetch('/api/admin/setup-master-admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@apprenticeapex.com',
+                        password: 'MasterAdmin2024!',
+                        setupCode: 'SETUP_APEX_2024'
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <h3>Response:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <p>Status: ${response.status}</p>
+                `;
+
+                if (data.success) {
+                    alert('Master admin created successfully!');
+                } else {
+                    console.error('Failed to create master admin:', data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

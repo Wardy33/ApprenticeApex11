@@ -1,0 +1,368 @@
+/* ApprenticeApex Accessibility CSS - WCAG AA Compliance */
+
+/* ========================================
+   FOCUS INDICATORS & KEYBOARD NAVIGATION 
+   ======================================== */
+
+/* Electric blue focus indicators for all interactive elements */
+.focus-indicator,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="menuitem"]:focus-visible {
+  outline: 3px solid #0080FF !important;
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+}
+
+/* Remove default browser outline when using our custom focus indicators */
+*:focus {
+  outline: none;
+}
+
+/* Enhanced focus for form elements */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  box-shadow: 0 0 0 3px #0080FF40, 0 0 0 6px #0080FF !important;
+  border-color: #0080FF !important;
+}
+
+/* Remove focus indicators from header navigation buttons */
+header .focus-indicator,
+header button:focus-visible,
+header a:focus-visible,
+nav .focus-indicator,
+nav button:focus-visible,
+nav a:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Subtle focus for header buttons - minimal visual change */
+header .focus-indicator:focus-visible,
+header button:focus-visible,
+header a:focus-visible,
+nav .focus-indicator:focus-visible,
+nav button:focus-visible,
+nav a:focus-visible {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  transform: scale(1.02) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* ========================================
+   SKIP LINKS 
+   ======================================== */
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #0080FF;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  z-index: 9999;
+  font-size: 14px;
+  transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+  top: 6px;
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+
+/* ========================================
+   SCREEN READER UTILITIES 
+   ======================================== */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Screen reader only content that becomes visible on focus */
+.sr-only-focusable:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: inherit !important;
+  margin: inherit !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+}
+
+/* ========================================
+   TOUCH TARGET SIZES (MOBILE)
+   ======================================== */
+
+/* Minimum 44px touch targets for mobile - CRITICAL FIX */
+@media (max-width: 768px) {
+  button,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  a,
+  [role="button"],
+  [role="link"],
+  [tabindex],
+  .touch-target {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    touch-action: manipulation;
+    /* Ensure adequate spacing between touch elements */
+    margin: 4px;
+  }
+
+  /* Special handling for inline buttons and links */
+  a:not(.button):not(.btn),
+  button:not(.large) {
+    padding: 12px 16px !important;
+    min-height: 44px !important;
+  }
+
+  /* Navigation menu items need proper touch targets */
+  nav a,
+  nav button,
+  .nav-item {
+    min-height: 48px !important;
+    padding: 12px 16px !important;
+    margin: 2px 0 !important;
+  }
+
+  /* Form inputs optimized for mobile */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: max(16px, 1rem) !important;
+    min-height: 48px !important;
+    padding: 12px 16px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Card and grid optimizations for mobile */
+  .swipe-card {
+    max-height: 480px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  /* Statistics grids - force single column on smallest screens */
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* Ensure proper spacing in mobile layouts */
+  .mobile-spacing > * + * {
+    margin-top: 8px !important;
+  }
+
+  /* Text sizing for mobile readability */
+  .hero-text {
+    font-size: 2.5rem !important; /* Much smaller than current text-5xl md:text-7xl */
+    line-height: 1.2 !important;
+  }
+
+  /* Responsive button groups */
+  .button-group {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .button-group button {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+}
+
+/* ========================================
+   HIGH CONTRAST MODE SUPPORT 
+   ======================================== */
+
+@media (prefers-contrast: high) {
+  .focus-indicator,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 4px solid CanvasText !important;
+    outline-offset: 2px !important;
+  }
+}
+
+/* ========================================
+   REDUCED MOTION SUPPORT 
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable parallax and complex animations */
+  .animate-pulse,
+  .animate-bounce,
+  .animate-spin {
+    animation: none !important;
+  }
+}
+
+/* ========================================
+   ARIA LIVE REGIONS 
+   ======================================== */
+
+.live-region {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.live-region[aria-live="polite"],
+.live-region[aria-live="assertive"] {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
+
+/* ========================================
+   KEYBOARD NAVIGATION INDICATORS 
+   ======================================== */
+
+/* Visual indicators for keyboard users */
+.keyboard-user button:focus,
+.keyboard-user input:focus,
+.keyboard-user textarea:focus,
+.keyboard-user select:focus,
+.keyboard-user a:focus {
+  box-shadow: 0 0 0 3px #0080FF, 0 0 0 6px #ffffff;
+}
+
+/* ========================================
+   ACCESSIBLE COLOR CONTRASTS 
+   ======================================== */
+
+/* Ensure all text meets WCAG AA contrast ratios */
+.text-contrast-aa {
+  color: #ffffff;
+  background-color: #000000;
+}
+
+.text-contrast-aa-large {
+  color: #cccccc;
+  background-color: #333333;
+}
+
+/* ========================================
+   FOCUS MANAGEMENT 
+   ======================================== */
+
+/* Focus trap for modals and dialogs */
+.focus-trap {
+  position: relative;
+}
+
+.focus-trap::before,
+.focus-trap::after {
+  content: "";
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ========================================
+   LOADING AND ERROR STATES 
+   ======================================== */
+
+/* Accessible loading indicators */
+.loading-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-left-color: #0080FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+    border-left-color: #0080FF;
+  }
+}
+
+/* Error states with proper contrast */
+.error-message {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.dark .error-message {
+  color: #fca5a5;
+  background-color: #450a0a;
+  border-color: #991b1b;
+}
+
+/* ========================================
+   ACCESSIBLE TYPOGRAPHY 
+   ======================================== */
+
+/* Improved line height for readability */
+.readable-text {
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+/* Ensure proper heading hierarchy is visually distinct */
+h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; }
+h2 { font-size: 2rem; font-weight: 600; margin-bottom: 0.875rem; }
+h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem; }
+h4 { font-size: 1.25rem; font-weight: 500; margin-bottom: 0.625rem; }
+h5 { font-size: 1.125rem; font-weight: 500; margin-bottom: 0.5rem; }
+h6 { font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem; }
