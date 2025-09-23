@@ -980,7 +980,7 @@ function MessagesPage() {
 
   const openChat = (conversationId: string) => {
     markAsReadConv(conversationId);
-    navigate(`/company/chat/${conversationId}`);
+    navigate(`/company/messages/${conversationId}`);
   };
 
   return (
