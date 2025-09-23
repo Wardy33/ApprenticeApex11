@@ -20,9 +20,9 @@ function StudentAppLayout({ children }: StudentAppLayoutProps) {
       <nav className="bg-white border-t border-gray-200 px-6 py-2">
         <div className="flex items-center justify-around">
           <Link
-            to="/student/home"
+            to="/candidate/home"
             className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-              isActive("/student/home") || isActive("/student")
+              isActive("/candidate/home") || isActive("/candidate")
                 ? "text-orange-600 bg-orange-50"
                 : "text-gray-600 hover:text-gray-900"
             }`}
@@ -32,9 +32,9 @@ function StudentAppLayout({ children }: StudentAppLayoutProps) {
           </Link>
 
           <Link
-            to="/student/jobs"
+            to="/candidate/jobs"
             className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-              isActive("/student/jobs")
+              isActive("/candidate/jobs")
                 ? "text-orange-600 bg-orange-50"
                 : "text-gray-600 hover:text-gray-900"
             }`}
@@ -44,9 +44,9 @@ function StudentAppLayout({ children }: StudentAppLayoutProps) {
           </Link>
 
           <Link
-            to="/student/matches"
+            to="/candidate/matches"
             className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-              isActive("/student/matches")
+              isActive("/candidate/matches")
                 ? "text-orange-600 bg-orange-50"
                 : "text-gray-600 hover:text-gray-900"
             }`}
@@ -56,9 +56,9 @@ function StudentAppLayout({ children }: StudentAppLayoutProps) {
           </Link>
 
           <Link
-            to="/student/messages"
+            to="/candidate/messages"
             className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-              isActive("/student/messages")
+              isActive("/candidate/messages")
                 ? "text-orange-600 bg-orange-50"
                 : "text-gray-600 hover:text-gray-900"
             }`}
@@ -68,9 +68,9 @@ function StudentAppLayout({ children }: StudentAppLayoutProps) {
           </Link>
 
           <Link
-            to="/student/profile"
+            to="/candidate/profile"
             className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-              isActive("/student/profile")
+              isActive("/candidate/profile")
                 ? "text-orange-600 bg-orange-50"
                 : "text-gray-600 hover:text-gray-900"
             }`}

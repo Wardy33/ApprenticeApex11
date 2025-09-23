@@ -748,7 +748,7 @@ function ProfileSetupStep4({
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Navigate to main student app
-      navigate("/student/home");
+      navigate("/candidate/home");
     } catch (error) {
       console.error("Failed to save profile:", error);
     } finally {
@@ -1053,7 +1053,7 @@ export default function CandidateProfileSetup() {
       {/* Header */}
       <header className="flex items-center justify-between p-4 border-b border-gray-200" style={{backgroundColor: '#020202'}}>
         <button
-          onClick={() => navigate("/student")}
+          onClick={() => navigate("/candidate")}
           className="p-2 hover:bg-gray-700 rounded-full text-white"
         >
           <ArrowLeft className="h-6 w-6" />
@@ -1107,7 +1107,7 @@ export default function CandidateProfileSetup() {
           <ProfileSetupStep4
             data={profileData}
             onUpdate={updateProfileData}
-            onComplete={() => navigate("/student/home")}
+            onComplete={() => navigate("/candidate/home")}
             onBack={prevStep}
           />
         )}
