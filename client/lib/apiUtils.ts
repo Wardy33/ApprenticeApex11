@@ -278,9 +278,12 @@ class ApiClient {
     password: string,
     role?: "candidate" | "company",
   ): Promise<ApiResponse<AuthResponse>> {
-    return this.makeRequest<AuthResponse>("/api/auth/login", {
+    // Use different endpoints for company vs candidate login
+    const endpoint = role === "company" ? "/api/auth/company/signin" : "/api/auth/login";
+
+    return this.makeRequest<AuthResponse>(endpoint, {
       method: "POST",
-      body: { email, password, role },
+      body: { email, password },
       timeout: 15000, // Longer timeout for login
     });
   }

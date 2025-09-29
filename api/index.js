@@ -272,7 +272,7 @@ async function handleUserLogin(req, res) {
   try {
     console.log('User login request:', req.body);
 
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     // Validation
     if (!email || !password) {
@@ -291,9 +291,28 @@ async function handleUserLogin(req, res) {
       });
     }
 
-    // For demo purposes, accept any valid email/password combination
-    const mockUserId = 'user_login_' + Date.now();
-    const mockToken = generateMockJWT(mockUserId, 'candidate', email);
+    // Determine the user role (default to candidate for backward compatibility)
+    const userRole = role || 'candidate';
+    const mockUserId = `${userRole}_login_` + Date.now();
+    const mockToken = generateMockJWT(mockUserId, userRole, email);
+
+    // Create appropriate profile based on role
+    const profile = userRole === 'company' ? {
+      companyName: 'Demo Company',
+      industry: 'Technology',
+      contactPerson: {
+        firstName: 'Demo',
+        lastName: 'Manager'
+      },
+      isVerified: false
+    } : {
+      firstName: 'Demo',
+      lastName: 'User',
+      skills: [],
+      hasDriversLicense: false,
+      education: [],
+      experience: []
+    };
 
     return res.status(200).json({
       success: true,
@@ -301,15 +320,8 @@ async function handleUserLogin(req, res) {
         user: {
           _id: mockUserId,
           email: email.toLowerCase(),
-          role: 'candidate',
-          profile: {
-            firstName: 'Demo',
-            lastName: 'User',
-            skills: [],
-            hasDriversLicense: false,
-            education: [],
-            experience: []
-          },
+          role: userRole,
+          profile: profile,
           isEmailVerified: true,
           lastLogin: new Date(),
           createdAt: new Date()
