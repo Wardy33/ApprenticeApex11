@@ -1,5 +1,5 @@
 // Database connection and utilities for Neon PostgreSQL
-const { Pool } = require('pg');
+import { Pool } from 'pg';
 
 // Check for required environment variables
 if (!process.env.DATABASE_URL) {
@@ -133,7 +133,7 @@ async function updateUserLastLogin(userId) {
   }
 }
 
-module.exports = {
+export {
   pool,
   testConnection,
   initializeDatabase,

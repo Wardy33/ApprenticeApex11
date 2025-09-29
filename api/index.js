@@ -1,6 +1,7 @@
 // ApprenticeApex Vercel Serverless API with Neon PostgreSQL
-const bcrypt = require('bcryptjs');
-const { testConnection, initializeDatabase, createUser, getUserByEmail, updateUserLastLogin } = require('./database');
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { testConnection, initializeDatabase, createUser, getUserByEmail, updateUserLastLogin } from './database.js';
 
 // Initialize database connection on cold start
 let dbInitialized = false;
@@ -150,7 +151,6 @@ function generateJWT(userId, role, email) {
       .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
     // Create signature using Node.js crypto (should be available in Vercel)
-    const crypto = require('crypto');
     const data = `${header}.${payload}`;
     const signature = crypto
       .createHmac('sha256', JWT_SECRET)
