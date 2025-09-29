@@ -157,9 +157,26 @@ class ApiClient {
         let data;
         try {
           const responseText = await response.text();
+          console.log(`📥 Raw response for ${method} ${endpoint}:`, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+            bodyLength: responseText.length,
+            bodyPreview: responseText.substring(0, 500)
+          });
+
           data = responseText ? JSON.parse(responseText) : {};
+
+          console.log(`✅ Parsed response for ${method} ${endpoint}:`, {
+            success: data.success,
+            hasData: !!data.data,
+            hasError: !!data.error,
+            dataPreview: data.data ? Object.keys(data.data) : 'none'
+          });
+
         } catch (parseError) {
-          console.error("Failed to parse response JSON:", parseError);
+          console.error(`❌ Failed to parse response JSON for ${method} ${endpoint}:`, parseError);
+          console.error('Response text was:', responseText);
           return {
             data: null,
             error: {
@@ -178,12 +195,16 @@ class ApiClient {
 
         lastError = error as Error;
 
-        console.warn(`Request attempt ${attempt + 1} failed:`, {
+        console.warn(`❌ Request attempt ${attempt + 1} failed for ${method} ${endpoint}:`, {
           url,
           method,
-          error: lastError.message,
+          errorName: lastError.name,
+          errorMessage: lastError.message,
+          errorStack: lastError.stack,
           attempt: attempt + 1,
           maxRetries: retries + 1,
+          errorType: typeof error,
+          errorDetails: error
         });
 
         // Handle different error types
@@ -236,6 +257,13 @@ class ApiClient {
     }
 
     // Return final error after all retries exhausted
+    console.error(`🚫 All retries exhausted for ${endpoint}:`, {
+      lastErrorName: lastError?.name,
+      lastErrorMessage: lastError?.message,
+      totalAttempts: retries + 1,
+      finalError: lastError
+    });
+
     return {
       data: null,
       error: {
@@ -243,7 +271,7 @@ class ApiClient {
           lastError?.message === "Request timeout"
             ? "Request timeout. Please try again."
             : lastError?.message ||
-              "Network error. Please check your connection.",
+              `Network error. Please check your connection. (${lastError?.name || 'Unknown error'})`,
       },
     };
   }
