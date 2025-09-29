@@ -1,12 +1,23 @@
 // Database connection and utilities for Neon PostgreSQL
 const { Pool } = require('pg');
 
+// Check for required environment variables
+if (!process.env.DATABASE_URL) {
+  console.error('❌ DATABASE_URL environment variable is not set');
+  throw new Error('Database configuration error: DATABASE_URL is required');
+}
+
+console.log('🔗 Connecting to database:', process.env.DATABASE_URL.replace(/:[^@]*@/, ':***@'));
+
 // Create connection pool
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
-  }
+  },
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 // Test database connection

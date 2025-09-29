@@ -28,16 +28,31 @@ export default async function handler(req, res) {
   if (!dbInitialized) {
     try {
       console.log('🔄 Initializing database connection...');
+      console.log('Environment variables check:', {
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        nodeEnv: process.env.NODE_ENV || 'not-set'
+      });
+
       await testConnection();
       await initializeDatabase();
       dbInitialized = true;
       console.log('✅ Database initialization complete');
     } catch (dbError) {
-      console.error('❌ Database initialization failed:', dbError.message);
+      console.error('❌ Database initialization failed:', dbError);
+      console.error('Database error details:', {
+        message: dbError.message,
+        code: dbError.code,
+        stack: dbError.stack
+      });
+
       return res.status(500).json({
         success: false,
         error: 'Database connection failed',
-        details: 'Unable to connect to database. Please try again later.'
+        details: `Unable to connect to database: ${dbError.message}`,
+        debug: {
+          hasDatabaseUrl: !!process.env.DATABASE_URL,
+          errorCode: dbError.code
+        }
       });
     }
   }
