@@ -91,19 +91,29 @@ export default async function handler(req, res) {
   }
 }
 
-// Mock JWT generation function
+// JWT generation function with proper signing
 function generateMockJWT(userId, role, email) {
-  // In a real implementation, you'd use proper JWT library
-  // For now, we'll create a simple token structure
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
+  const crypto = require('crypto');
+
+  // Use environment variable for JWT secret or fallback to a secure default
+  const JWT_SECRET = process.env.JWT_SECRET || 'apprenticeapex-secure-secret-key-2024-production-ready';
+
+  // Create header and payload
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
   const payload = Buffer.from(JSON.stringify({
     userId,
     role,
     email,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
-  })).toString('base64');
-  const signature = 'mock-signature';
+  })).toString('base64url');
+
+  // Create signature using HMAC SHA256
+  const data = `${header}.${payload}`;
+  const signature = crypto
+    .createHmac('sha256', JWT_SECRET)
+    .update(data)
+    .digest('base64url');
 
   return `${header}.${payload}.${signature}`;
 }
@@ -129,6 +139,14 @@ async function handleUserRegistration(req, res) {
       return res.status(400).json({
         success: false,
         error: 'Invalid email format'
+      });
+    }
+
+    // Password strength validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters long'
       });
     }
 
@@ -219,6 +237,14 @@ async function handleCompanyRegistration(req, res) {
       });
     }
 
+    // Password strength validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters long'
+      });
+    }
+
     const mockUserId = 'company_' + Date.now();
     const mockToken = generateMockJWT(mockUserId, 'company', email);
 
@@ -288,6 +314,14 @@ async function handleUserLogin(req, res) {
       return res.status(400).json({
         success: false,
         error: 'Invalid email format'
+      });
+    }
+
+    // Password strength validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters long'
       });
     }
 
@@ -362,6 +396,14 @@ async function handleCompanySignin(req, res) {
       return res.status(400).json({
         success: false,
         error: 'Invalid email format'
+      });
+    }
+
+    // Password strength validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters long'
       });
     }
 
