@@ -34,7 +34,7 @@ function SignUpForm() {
       return await register({
         email: data.email,
         password: data.password,
-        role: "student",
+        role: "candidate",
         firstName: data.firstName,
         lastName: data.lastName,
       });

@@ -123,7 +123,7 @@ async function handleUserRegistration(req, res) {
   try {
     console.log('User registration request:', req.body);
 
-    const { email, password, role, profile } = req.body;
+    const { email, password, role, profile, firstName, lastName } = req.body;
 
     // Validation
     if (!email || !password || !role) {
@@ -155,8 +155,8 @@ async function handleUserRegistration(req, res) {
     const mockToken = generateMockJWT(mockUserId, role, email);
 
     const defaultProfile = role === 'candidate' ? {
-      firstName: 'New',
-      lastName: 'User',
+      firstName: firstName || 'New',
+      lastName: lastName || 'User',
       skills: [],
       hasDriversLicense: false,
       education: [],
