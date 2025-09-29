@@ -91,39 +91,59 @@ export default async function handler(req, res) {
   }
 }
 
-// JWT generation function with proper signing
+// Simple JWT generation function for serverless compatibility
 function generateMockJWT(userId, role, email) {
-  const crypto = require('crypto');
+  try {
+    // Use environment variable for JWT secret or fallback to a secure default
+    const JWT_SECRET = process.env.JWT_SECRET || 'apprenticeapex-secure-secret-key-2024-production-ready';
 
-  // Use environment variable for JWT secret or fallback to a secure default
-  const JWT_SECRET = process.env.JWT_SECRET || 'apprenticeapex-secure-secret-key-2024-production-ready';
+    // Create header and payload with base64 encoding (more compatible)
+    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64')
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
-  // Create header and payload
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-  const payload = Buffer.from(JSON.stringify({
-    userId,
-    role,
-    email,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
-  })).toString('base64url');
+    const payload = Buffer.from(JSON.stringify({
+      userId,
+      role,
+      email,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
+    })).toString('base64')
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
-  // Create signature using HMAC SHA256
-  const data = `${header}.${payload}`;
-  const signature = crypto
-    .createHmac('sha256', JWT_SECRET)
-    .update(data)
-    .digest('base64url');
+    // Create signature using Node.js crypto (should be available in Vercel)
+    const crypto = require('crypto');
+    const data = `${header}.${payload}`;
+    const signature = crypto
+      .createHmac('sha256', JWT_SECRET)
+      .update(data)
+      .digest('base64')
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
-  return `${header}.${payload}.${signature}`;
+    const token = `${header}.${payload}.${signature}`;
+    console.log('JWT generated successfully, length:', token.length);
+    return token;
+
+  } catch (error) {
+    console.error('JWT generation error:', error);
+    // Fallback to a simple mock token for development
+    const simpleToken = `mock.${btoa(JSON.stringify({userId, role, email, exp: Date.now() + 86400000}))}.signature`;
+    console.log('Using fallback token:', simpleToken);
+    return simpleToken;
+  }
 }
 
 // User registration handler
 async function handleUserRegistration(req, res) {
   try {
-    console.log('User registration request:', req.body);
+    console.log('=== USER REGISTRATION START ===');
+    console.log('Request method:', req.method);
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
+    console.log('Body type:', typeof req.body);
 
     const { email, password, role, profile, firstName, lastName } = req.body;
+
+    console.log('Extracted fields:', { email, password: !!password, role, firstName, lastName, hasProfile: !!profile });
 
     // Validation
     if (!email || !password || !role) {
@@ -215,9 +235,29 @@ async function handleUserRegistration(req, res) {
 // Company registration handler
 async function handleCompanyRegistration(req, res) {
   try {
-    console.log('Company registration request:', req.body);
+    console.log('=== COMPANY REGISTRATION START ===');
+    console.log('Request method:', req.method);
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
+    console.log('Body type:', typeof req.body);
 
     const { email, password, companyName, firstName, lastName, industry, companySize, website, description, address, city, postcode, position } = req.body;
+
+    console.log('Extracted company fields:', {
+      email,
+      password: !!password,
+      companyName,
+      firstName,
+      lastName,
+      industry,
+      companySize,
+      hasWebsite: !!website,
+      hasDescription: !!description,
+      hasAddress: !!address,
+      city,
+      postcode,
+      position
+    });
 
     // Validation
     if (!email || !password || !companyName || !firstName || !lastName) {
