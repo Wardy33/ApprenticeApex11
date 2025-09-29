@@ -1,4 +1,10 @@
-// ApprenticeApex Vercel Serverless API
+// ApprenticeApex Vercel Serverless API with Neon PostgreSQL
+const bcrypt = require('bcryptjs');
+const { testConnection, initializeDatabase, createUser, getUserByEmail, updateUserLastLogin } = require('./database');
+
+// Initialize database connection on cold start
+let dbInitialized = false;
+
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -17,6 +23,24 @@ export default async function handler(req, res) {
   const path = url.replace('/api', '');
 
   console.log(`[${req.method}] ${url} - Request received`);
+
+  // Initialize database on first request
+  if (!dbInitialized) {
+    try {
+      console.log('🔄 Initializing database connection...');
+      await testConnection();
+      await initializeDatabase();
+      dbInitialized = true;
+      console.log('✅ Database initialization complete');
+    } catch (dbError) {
+      console.error('❌ Database initialization failed:', dbError.message);
+      return res.status(500).json({
+        success: false,
+        error: 'Database connection failed',
+        details: 'Unable to connect to database. Please try again later.'
+      });
+    }
+  }
 
   try {
     // Authentication endpoints
@@ -91,8 +115,8 @@ export default async function handler(req, res) {
   }
 }
 
-// Simple JWT generation function for serverless compatibility
-function generateMockJWT(userId, role, email) {
+// JWT generation function for serverless compatibility
+function generateJWT(userId, role, email) {
   try {
     // Use environment variable for JWT secret or fallback to a secure default
     const JWT_SECRET = process.env.JWT_SECRET || 'apprenticeapex-secure-secret-key-2024-production-ready';
@@ -125,21 +149,15 @@ function generateMockJWT(userId, role, email) {
 
   } catch (error) {
     console.error('JWT generation error:', error);
-    // Fallback to a simple mock token for development
-    const simpleToken = `mock.${btoa(JSON.stringify({userId, role, email, exp: Date.now() + 86400000}))}.signature`;
-    console.log('Using fallback token:', simpleToken);
-    return simpleToken;
+    throw new Error('Failed to generate authentication token');
   }
 }
 
-// User registration handler
+// User registration handler with real database
 async function handleUserRegistration(req, res) {
   try {
     console.log('=== USER REGISTRATION START ===');
-    console.log('Request method:', req.method);
-    console.log('Request headers:', req.headers);
     console.log('Request body:', req.body);
-    console.log('Body type:', typeof req.body);
 
     const { email, password, role, profile, firstName, lastName } = req.body;
 
@@ -170,11 +188,12 @@ async function handleUserRegistration(req, res) {
       });
     }
 
-    // For now, we'll create a mock user since we don't have database connection
-    const mockUserId = 'user_' + Date.now();
-    const mockToken = generateMockJWT(mockUserId, role, email);
+    // Hash password
+    console.log('🔐 Hashing password...');
+    const passwordHash = await bcrypt.hash(password, 12);
 
-    const defaultProfile = role === 'candidate' ? {
+    // Create profile object
+    const userProfile = role === 'candidate' ? {
       firstName: firstName || 'New',
       lastName: lastName || 'User',
       skills: [],
@@ -206,24 +225,47 @@ async function handleUserRegistration(req, res) {
       isVerified: false
     };
 
+    // Create user in database
+    console.log('💾 Creating user in database...');
+    const newUser = await createUser({
+      email,
+      passwordHash,
+      role,
+      profile: userProfile
+    });
+
+    // Generate JWT token
+    console.log('🎫 Generating JWT token...');
+    const token = generateJWT(newUser.id, role, email);
+
+    console.log('✅ User registration successful');
     return res.status(201).json({
       success: true,
       data: {
         user: {
-          _id: mockUserId,
-          email: email.toLowerCase(),
-          role,
-          profile: profile || defaultProfile,
-          isEmailVerified: false,
-          createdAt: new Date()
+          _id: newUser.id,
+          email: newUser.email,
+          role: newUser.role,
+          profile: newUser.profile,
+          isEmailVerified: newUser.is_email_verified,
+          createdAt: newUser.created_at
         },
-        token: mockToken
+        token
       },
       message: 'Registration successful'
     });
 
   } catch (error) {
-    console.error('User registration error:', error);
+    console.error('❌ User registration error:', error);
+
+    if (error.message === 'User already exists') {
+      return res.status(409).json({
+        success: false,
+        error: 'Email already registered',
+        details: 'A user with this email address already exists'
+      });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'Registration failed',
@@ -232,14 +274,11 @@ async function handleUserRegistration(req, res) {
   }
 }
 
-// Company registration handler
+// Company registration handler with real database
 async function handleCompanyRegistration(req, res) {
   try {
     console.log('=== COMPANY REGISTRATION START ===');
-    console.log('Request method:', req.method);
-    console.log('Request headers:', req.headers);
     console.log('Request body:', req.body);
-    console.log('Body type:', typeof req.body);
 
     const { email, password, companyName, firstName, lastName, industry, companySize, website, description, address, city, postcode, position } = req.body;
 
@@ -285,46 +324,73 @@ async function handleCompanyRegistration(req, res) {
       });
     }
 
-    const mockUserId = 'company_' + Date.now();
-    const mockToken = generateMockJWT(mockUserId, 'company', email);
+    // Hash password
+    console.log('🔐 Hashing password...');
+    const passwordHash = await bcrypt.hash(password, 12);
 
+    // Create company profile
+    const companyProfile = {
+      companyName,
+      industry: industry || 'Technology',
+      companySize,
+      website: website || '',
+      description: description || '',
+      location: {
+        city: city || 'Unknown',
+        address: address || '',
+        postcode: postcode || '',
+        coordinates: [0, 0]
+      },
+      contactPerson: {
+        firstName,
+        lastName,
+        position: position || 'Manager'
+      },
+      isVerified: false
+    };
+
+    // Create company user in database
+    console.log('💾 Creating company in database...');
+    const newUser = await createUser({
+      email,
+      passwordHash,
+      role: 'company',
+      profile: companyProfile
+    });
+
+    // Generate JWT token
+    console.log('🎫 Generating JWT token...');
+    const token = generateJWT(newUser.id, 'company', email);
+
+    console.log('✅ Company registration successful');
     return res.status(201).json({
       success: true,
       data: {
         user: {
-          _id: mockUserId,
-          email: email.toLowerCase(),
-          role: 'company',
-          profile: {
-            companyName,
-            industry: industry || 'Technology',
-            companySize,
-            website: website || '',
-            description: description || '',
-            location: {
-              city: city || 'Unknown',
-              address: address || '',
-              postcode: postcode || '',
-              coordinates: [0, 0]
-            },
-            contactPerson: {
-              firstName,
-              lastName,
-              position: position || 'Manager'
-            },
-            isVerified: false
-          },
-          isEmailVerified: false,
+          _id: newUser.id,
+          email: newUser.email,
+          role: newUser.role,
+          profile: newUser.profile,
+          isEmailVerified: newUser.is_email_verified,
           isActive: true,
-          createdAt: new Date()
+          createdAt: newUser.created_at
         },
-        token: mockToken
+        token
       },
       message: 'Company registration successful'
     });
 
   } catch (error) {
-    console.error('Company registration error:', error);
+    console.error('❌ Company registration error:', error);
+
+    if (error.message === 'User already exists') {
+      return res.status(409).json({
+        success: false,
+        error: 'Email already registered',
+        details: 'A company with this email address already exists'
+      });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'Company registration failed',
@@ -333,92 +399,11 @@ async function handleCompanyRegistration(req, res) {
   }
 }
 
-// User login handler
+// User login handler with real database
 async function handleUserLogin(req, res) {
   try {
-    console.log('User login request:', req.body);
-
-    const { email, password, role } = req.body;
-
-    // Validation
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email and password are required'
-      });
-    }
-
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid email format'
-      });
-    }
-
-    // Password strength validation
-    if (password.length < 8) {
-      return res.status(400).json({
-        success: false,
-        error: 'Password must be at least 8 characters long'
-      });
-    }
-
-    // Determine the user role (default to candidate for backward compatibility)
-    const userRole = role || 'candidate';
-    const mockUserId = `${userRole}_login_` + Date.now();
-    const mockToken = generateMockJWT(mockUserId, userRole, email);
-
-    // Create appropriate profile based on role
-    const profile = userRole === 'company' ? {
-      companyName: 'Demo Company',
-      industry: 'Technology',
-      contactPerson: {
-        firstName: 'Demo',
-        lastName: 'Manager'
-      },
-      isVerified: false
-    } : {
-      firstName: 'Demo',
-      lastName: 'User',
-      skills: [],
-      hasDriversLicense: false,
-      education: [],
-      experience: []
-    };
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        user: {
-          _id: mockUserId,
-          email: email.toLowerCase(),
-          role: userRole,
-          profile: profile,
-          isEmailVerified: true,
-          lastLogin: new Date(),
-          createdAt: new Date()
-        },
-        token: mockToken
-      },
-      message: 'Login successful'
-    });
-
-  } catch (error) {
-    console.error('User login error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Login failed',
-      details: error.message
-    });
-  }
-}
-
-// Company signin handler
-async function handleCompanySignin(req, res) {
-  try {
-    console.log('Company signin request:', req.body);
+    console.log('=== USER LOGIN START ===');
+    console.log('Request body:', req.body);
 
     const { email, password } = req.body;
 
@@ -439,45 +424,149 @@ async function handleCompanySignin(req, res) {
       });
     }
 
-    // Password strength validation
-    if (password.length < 8) {
-      return res.status(400).json({
+    // Get user from database
+    console.log('🔍 Looking up user in database...');
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+      console.log('❌ User not found');
+      return res.status(401).json({
         success: false,
-        error: 'Password must be at least 8 characters long'
+        error: 'Invalid email or password'
       });
     }
 
-    // For demo purposes, accept any valid email/password combination
-    const mockUserId = 'company_login_' + Date.now();
-    const mockToken = generateMockJWT(mockUserId, 'company', email);
+    console.log('✅ User found:', user.email, 'Role:', user.role);
 
+    // Verify password
+    console.log('🔐 Verifying password...');
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+    if (!isPasswordValid) {
+      console.log('❌ Invalid password');
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid email or password'
+      });
+    }
+
+    console.log('✅ Password verified');
+
+    // Update last login
+    await updateUserLastLogin(user.id);
+
+    // Generate JWT token
+    console.log('🎫 Generating JWT token...');
+    const token = generateJWT(user.id, user.role, user.email);
+
+    console.log('✅ Login successful');
     return res.status(200).json({
       success: true,
       data: {
         user: {
-          _id: mockUserId,
-          email: email.toLowerCase(),
-          role: 'company',
-          profile: {
-            companyName: 'Demo Company',
-            industry: 'Technology',
-            contactPerson: {
-              firstName: 'Demo',
-              lastName: 'Manager'
-            },
-            isVerified: false
-          },
-          isEmailVerified: true,
+          _id: user.id,
+          email: user.email,
+          role: user.role,
+          profile: user.profile,
+          isEmailVerified: user.is_email_verified,
           lastLogin: new Date(),
-          createdAt: new Date()
+          createdAt: user.created_at
         },
-        token: mockToken
+        token
+      },
+      message: 'Login successful'
+    });
+
+  } catch (error) {
+    console.error('❌ User login error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Login failed',
+      details: error.message
+    });
+  }
+}
+
+// Company signin handler with real database
+async function handleCompanySignin(req, res) {
+  try {
+    console.log('=== COMPANY SIGNIN START ===');
+    console.log('Request body:', req.body);
+
+    const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email and password are required'
+      });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid email format'
+      });
+    }
+
+    // Get user from database
+    console.log('🔍 Looking up company in database...');
+    const user = await getUserByEmail(email);
+
+    if (!user || user.role !== 'company') {
+      console.log('❌ Company not found');
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid email or password'
+      });
+    }
+
+    console.log('✅ Company found:', user.email);
+
+    // Verify password
+    console.log('🔐 Verifying password...');
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+    if (!isPasswordValid) {
+      console.log('❌ Invalid password');
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid email or password'
+      });
+    }
+
+    console.log('✅ Password verified');
+
+    // Update last login
+    await updateUserLastLogin(user.id);
+
+    // Generate JWT token
+    console.log('🎫 Generating JWT token...');
+    const token = generateJWT(user.id, user.role, user.email);
+
+    console.log('✅ Company signin successful');
+    return res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          _id: user.id,
+          email: user.email,
+          role: user.role,
+          profile: user.profile,
+          isEmailVerified: user.is_email_verified,
+          lastLogin: new Date(),
+          createdAt: user.created_at
+        },
+        token
       },
       message: 'Company login successful'
     });
 
   } catch (error) {
-    console.error('Company signin error:', error);
+    console.error('❌ Company signin error:', error);
     return res.status(500).json({
       success: false,
       error: 'Company signin failed',
