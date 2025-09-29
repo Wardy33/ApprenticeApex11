@@ -39,7 +39,7 @@ async function initializeDatabase() {
   try {
     const client = await pool.connect();
 
-    // Create users table
+    // Create users table with proper schema
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -55,6 +55,25 @@ async function initializeDatabase() {
       )
     `);
 
+    // Ensure profile column exists (migration for existing tables)
+    try {
+      await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS profile JSONB NOT NULL DEFAULT '{}'
+      `);
+      console.log('✅ Profile column migration completed');
+    } catch (migrationError) {
+      console.log('Profile column already exists or migration not needed:', migrationError.message);
+    }
+
+    // Verify table structure
+    const tableInfo = await client.query(`
+      SELECT column_name, data_type, is_nullable, column_default
+      FROM information_schema.columns
+      WHERE table_name = 'users'
+      ORDER BY ordinal_position
+    `);
+
+    console.log('📋 Users table structure:', tableInfo.rows);
     console.log('✅ Database tables initialized');
     client.release();
   } catch (error) {
@@ -66,6 +85,14 @@ async function initializeDatabase() {
 // User database operations
 async function createUser(userData) {
   const { email, passwordHash, role, profile } = userData;
+
+  console.log('Creating user with data:', {
+    email: email?.toLowerCase(),
+    hasPasswordHash: !!passwordHash,
+    role,
+    profileType: typeof profile,
+    profileKeys: profile ? Object.keys(profile) : 'none'
+  });
 
   try {
     const client = await pool.connect();
@@ -81,18 +108,46 @@ async function createUser(userData) {
       throw new Error('User already exists');
     }
 
-    // Insert new user
-    const result = await client.query(
-      `INSERT INTO users (email, password_hash, role, profile)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, email, role, profile, is_email_verified, created_at`,
-      [email.toLowerCase(), passwordHash, role, JSON.stringify(profile)]
-    );
+    // Ensure profile is valid JSON
+    const profileJson = profile ? JSON.stringify(profile) : '{}';
+    console.log('Profile JSON being inserted:', profileJson.substring(0, 200) + '...');
+
+    // Insert new user with explicit column verification
+    const insertQuery = `
+      INSERT INTO users (email, password_hash, role, profile, is_email_verified, is_active)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, email, role, profile, is_email_verified, created_at
+    `;
+
+    console.log('Executing insert query with parameters:', [
+      email.toLowerCase(),
+      '[password_hash]',
+      role,
+      '[profile_json]',
+      false,
+      true
+    ]);
+
+    const result = await client.query(insertQuery, [
+      email.toLowerCase(),
+      passwordHash,
+      role,
+      profileJson,
+      false,
+      true
+    ]);
 
     client.release();
+    console.log('✅ User created successfully:', result.rows[0].id);
     return result.rows[0];
   } catch (error) {
-    console.error('❌ Create user failed:', error.message);
+    console.error('❌ Create user failed:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      detail: error.detail,
+      hint: error.hint
+    });
     throw error;
   }
 }
