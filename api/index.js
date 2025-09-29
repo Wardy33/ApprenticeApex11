@@ -364,7 +364,7 @@ async function handleUserRegistration(req, res) {
       success: true,
       data: {
         user: {
-          _id: newUser.id,
+          id: newUser.id,  // Changed from _id to id
           email: newUser.email,
           role: newUser.role,
           profile: newUser.profile,
@@ -488,7 +488,7 @@ async function handleCompanyRegistration(req, res) {
       success: true,
       data: {
         user: {
-          _id: newUser.id,
+          id: newUser.id,  // Changed from _id to id
           email: newUser.email,
           role: newUser.role,
           profile: newUser.profile,
@@ -585,7 +585,7 @@ async function handleUserLogin(req, res) {
       success: true,
       data: {
         user: {
-          _id: user.id,
+          id: user.id,  // Changed from _id to id
           email: user.email,
           role: user.role,
           profile: user.profile,
@@ -673,7 +673,7 @@ async function handleCompanySignin(req, res) {
       success: true,
       data: {
         user: {
-          _id: user.id,
+          id: user.id,  // Changed from _id to id
           email: user.email,
           role: user.role,
           profile: user.profile,

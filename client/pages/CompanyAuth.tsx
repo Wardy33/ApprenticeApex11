@@ -612,7 +612,7 @@ export function CompanySignInForm() {
         alert(`Sign in failed: ${errorMessage}`);
       } else {
         console.log('✅ Company login successful! User data:', {
-          id: response.data.user._id,
+          id: response.data.user.id,  // Changed from _id to id
           email: response.data.user.email,
           role: response.data.user.role
         });

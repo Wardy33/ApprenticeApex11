@@ -1415,14 +1415,23 @@ export default function CompanyPortal() {
     console.log('🔍 CompanyPortal authentication check:', {
       hasAuthToken: !!authToken,
       hasUserProfile: !!userProfile,
-      currentPath: window.location.pathname
+      currentPath: window.location.pathname,
+      authTokenPreview: authToken ? authToken.substring(0, 20) + '...' : 'none',
+      userProfilePreview: userProfile ? userProfile.substring(0, 100) + '...' : 'none'
     });
+
+    // Temporarily disable authentication check for debugging
+    const bypassAuth = window.location.search.includes('bypass=true');
+    if (bypassAuth) {
+      console.log('🚧 BYPASSING AUTHENTICATION FOR DEBUGGING');
+      return;
+    }
 
     if (userProfile) {
       try {
         const profile = JSON.parse(userProfile);
         console.log('👤 User profile data:', {
-          id: profile._id,
+          id: profile.id,  // Changed from _id to id
           email: profile.email,
           role: profile.role
         });
