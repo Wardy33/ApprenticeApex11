@@ -55,14 +55,25 @@ async function initializeDatabase() {
       )
     `);
 
-    // Ensure profile column exists (migration for existing tables)
-    try {
-      await client.query(`
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS profile JSONB NOT NULL DEFAULT '{}'
-      `);
-      console.log('✅ Profile column migration completed');
-    } catch (migrationError) {
-      console.log('Profile column already exists or migration not needed:', migrationError.message);
+    // Migrate existing tables to ensure all columns exist
+    console.log('🔄 Running database migrations...');
+
+    const migrations = [
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS profile JSONB NOT NULL DEFAULT \'{}\'',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS is_email_verified BOOLEAN DEFAULT FALSE',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP WITH TIME ZONE'
+    ];
+
+    for (const migration of migrations) {
+      try {
+        await client.query(migration);
+        console.log('✅ Migration completed:', migration.split('ADD COLUMN IF NOT EXISTS')[1]?.split(' ')[0] || 'unknown');
+      } catch (migrationError) {
+        console.log('Migration skipped (column exists):', migrationError.message);
+      }
     }
 
     // Verify table structure
@@ -112,29 +123,27 @@ async function createUser(userData) {
     const profileJson = profile ? JSON.stringify(profile) : '{}';
     console.log('Profile JSON being inserted:', profileJson.substring(0, 200) + '...');
 
-    // Insert new user with explicit column verification
+    // Insert new user - start with basic columns and add others if they exist
     const insertQuery = `
-      INSERT INTO users (email, password_hash, role, profile, is_email_verified, is_active)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id, email, role, profile, is_email_verified, created_at
+      INSERT INTO users (email, password_hash, role, profile)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, email, role, profile,
+                COALESCE(is_email_verified, false) as is_email_verified,
+                COALESCE(created_at, NOW()) as created_at
     `;
 
     console.log('Executing insert query with parameters:', [
       email.toLowerCase(),
       '[password_hash]',
       role,
-      '[profile_json]',
-      false,
-      true
+      '[profile_json]'
     ]);
 
     const result = await client.query(insertQuery, [
       email.toLowerCase(),
       passwordHash,
       role,
-      profileJson,
-      false,
-      true
+      profileJson
     ]);
 
     client.release();
