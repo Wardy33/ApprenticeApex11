@@ -597,27 +597,51 @@ export function CompanySignInForm() {
     setIsSubmitting(true);
 
     try {
-      console.log('Attempting company signin via /api/auth/login with role=company:', {
-        email: formData.email
+      console.log('🔐 Attempting company signin:', {
+        email: formData.email,
+        endpoint: 'company role login'
       });
 
       const response = await apiClient.login(formData.email, formData.password, 'company');
 
-      console.log('Company login response:', response);
+      console.log('📝 Company login response:', response);
 
       if (response.error) {
         const errorMessage = response.error.error || 'Sign in failed';
-        console.error('Company signin error:', errorMessage);
+        console.error('❌ Company signin error:', errorMessage);
         alert(`Sign in failed: ${errorMessage}`);
       } else {
-        // Use consistent token storage
+        console.log('✅ Company login successful! User data:', {
+          id: response.data.user._id,
+          email: response.data.user.email,
+          role: response.data.user.role
+        });
+        console.log('🎫 Token received:', response.data.token ? 'YES' : 'NO');
+
+        // Clear any existing tokens first
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userProfile');
+        localStorage.removeItem('token'); // Also clear any old token format
+
+        // Store new authentication data
         localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('userProfile', JSON.stringify(response.data.user));
-        console.log('Company login successful, redirecting to /company');
-        navigate('/company');
+
+        // Verify storage worked
+        const storedToken = localStorage.getItem('authToken');
+        const storedProfile = localStorage.getItem('userProfile');
+        console.log('✅ Token stored:', storedToken ? 'YES' : 'NO');
+        console.log('✅ Profile stored:', storedProfile ? 'YES' : 'NO');
+
+        console.log('🚀 Navigating to company dashboard...');
+
+        // Use window.location for more reliable navigation
+        setTimeout(() => {
+          window.location.href = '/company';
+        }, 100);
       }
     } catch (error) {
-      console.error('Company signin exception:', error);
+      console.error('❌ Company signin exception:', error);
       alert('Sign in failed. Please check your internet connection and try again.');
     } finally {
       setIsSubmitting(false);

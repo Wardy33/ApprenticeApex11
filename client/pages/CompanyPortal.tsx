@@ -1407,6 +1407,46 @@ function CompanyProfileSettingsPage() {
 }
 
 export default function CompanyPortal() {
+  // Check authentication on load
+  useEffect(() => {
+    const authToken = localStorage.getItem('authToken');
+    const userProfile = localStorage.getItem('userProfile');
+
+    console.log('🔍 CompanyPortal authentication check:', {
+      hasAuthToken: !!authToken,
+      hasUserProfile: !!userProfile,
+      currentPath: window.location.pathname
+    });
+
+    if (userProfile) {
+      try {
+        const profile = JSON.parse(userProfile);
+        console.log('👤 User profile data:', {
+          id: profile._id,
+          email: profile.email,
+          role: profile.role
+        });
+
+        // Check if user has company role
+        if (profile.role !== 'company') {
+          console.warn('⚠️ User role is not company:', profile.role);
+          alert('Access denied: This portal is for company accounts only.');
+          window.location.href = '/company/signin';
+          return;
+        }
+      } catch (e) {
+        console.error('❌ Error parsing user profile:', e);
+        localStorage.removeItem('userProfile');
+      }
+    }
+
+    if (!authToken) {
+      console.warn('⚠️ No auth token found, redirecting to signin');
+      window.location.href = '/company/signin';
+      return;
+    }
+  }, []);
+
   return (
     <Routes>
       <Route
